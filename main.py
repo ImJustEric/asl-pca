@@ -4,6 +4,7 @@ from cnn import *
 import os 
 import numpy as np
 from sklearn.model_selection import train_test_split
+from visualize import plot_pca_first_two_components
 
 # DIRECTORIES, PARAMETERS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,6 +48,8 @@ test_acc = evaluate_model(model, X_test_pca, y_test)
 print(f"Size of testing dataset: {X_test_pca.shape[0]} by {X_test_pca.shape[1]}")
 print(f"Test accuracy under {best_p} principal components: {test_acc}")
 
+# Plot components (uncomment if want plot)
+#plot_pca_first_two_components(X_train_pca, y_train, title="Train set: PC1 vs PC2")
 
 ### Now test against ResNet50 model embeddings, use KNN as well
 resnet = load_resnet50()

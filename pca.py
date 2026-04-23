@@ -42,6 +42,8 @@ def load_images_and_labels(root_dir):
 def preprocess_single_image(image_path):
     """
     Load a single image from path and preprocess it to match the training pipeline.
+    This will be used for testing single images, rather than 'preprocess_images', which
+    takes arrays of images and returns as an array
     """
     # Load image
     img = Image.open(image_path)

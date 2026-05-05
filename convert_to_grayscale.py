@@ -10,8 +10,10 @@ def convert_to_grayscale(img):
 
 
 if __name__ == "__main__":
-	input_root = "data/raw"
-	output_root = "data/filtered"
+	#input_root = "data/raw"
+	input_root = "data/raw_noisy"
+	#output_root = "data/filtered"
+	output_root = "data/filtered_noisy"
 	image_exts = {".jpg", ".jpeg", ".png"}
 
     # Go through each folder and preocess each image

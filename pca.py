@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from PIL import Image
 from sklearn.model_selection import StratifiedKFold
 import matplotlib.pyplot as plt
+from tqdm.auto import tqdm
 import os
 
 
@@ -86,30 +87,29 @@ def project_data(pca, data):
     return pca.transform(data)
 
 
-def cross_validate_p(X_train, y_train, num_pcs, k=3, n_splits=5):
+def cross_validate_p(X_train, y_train, num_pcs, k=3, n_splits=5, show_progress=True):
     """Perform k-fold cross validation to check which value of num_pc does best"""
-    """
-    Args:
-        X_train, y_train: TRAINING dataset
-        num_pcs: The number of principal components we are trying
-        k: The number of nearest neighbors
-        n_splits: The number of folds to perform
-    """
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
     results = {}
 
-    for num_pc in num_pcs:
+    pcs_iter = num_pcs
+    if show_progress:
+        pcs_iter = tqdm(num_pcs, desc="Testing #PCs", unit="setting")
+
+    for num_pc in pcs_iter:
         fold_accuracies = []
 
-        for train_idx, val_idx in skf.split(X_train, y_train):
+        fold_iter = skf.split(X_train, y_train)
+        if show_progress:
+            fold_iter = tqdm(fold_iter, total=n_splits, desc=f"CV folds (PCs={num_pc})", leave=False, unit="fold",)
+
+        for train_idx, val_idx in fold_iter:
             X_fold_train = X_train[train_idx]
             X_fold_val = X_train[val_idx]
             y_fold_train = y_train[train_idx]
             y_fold_val = y_train[val_idx]
 
-            # Fit PCA only on fold training data
             pca = perform_pca(X_fold_train, num_pc)
-
             X_fold_train_pca = project_data(pca, X_fold_train)
             X_fold_val_pca = project_data(pca, X_fold_val)
 

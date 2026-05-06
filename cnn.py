@@ -3,6 +3,8 @@ import torch
 from torchvision.models import resnet50, ResNet50_Weights
 from torchvision import transforms
 from PIL import Image
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 def load_resnet50():
     """Load pretrained ResNet50 with final classification layer removed so we have the embeddings"""
@@ -41,3 +43,36 @@ def extract_resnet_features(images, model, transform):
         features.append(feat)
 
     return np.array(features)
+
+def plot_resnet_tsne(embeddings, labels=None, class_names=None, perplexity=30, random_state=42):
+    """
+    Plot 2D t-SNE projection of CNN embeddings
+    """
+    embeddings = np.asarray(embeddings)
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
+    projected = tsne.fit_transform(embeddings)
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+    if labels is None:
+        ax.scatter(projected[:, 0], projected[:, 1], s=20, alpha=0.7)
+    else:
+        labels = np.asarray(labels)
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            mask = labels == label
+            name = class_names[label] if class_names is not None else str(label)
+            ax.scatter(projected[mask, 0], projected[mask, 1], s=20, alpha=0.7, label=name)
+        ax.legend(
+            title="Class",
+            bbox_to_anchor=(1.04, 1),
+            loc="upper left",
+            borderaxespad=0,
+            fontsize="small",
+            ncols=2,
+        )
+
+    ax.set_title("t-SNE of CNN Embeddings")
+    ax.set_xlabel("t-SNE 1")
+    ax.set_ylabel("t-SNE 2")
+    fig.tight_layout()
+    plt.show()

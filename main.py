@@ -27,13 +27,13 @@ print(f"Data loaded and preprocessed")
 # Perform cross-validation to see which value of number of principal components is best
 # Comment out this block if it takes too long! 
 # NOTE: Found that 200 was best, might be higher 
-cv_results = cross_validate_p(X_train, y_train, num_pcs=num_pcs, k=3)
-best_p = max(cv_results, key=cv_results.get)
-print(f"Performed cross validation with result of {best_p}")
+# cv_results = cross_validate_p(X_train, y_train, num_pcs=num_pcs, k=3)
+# best_p = max(cv_results, key=cv_results.get)
+# print(f"Performed cross validation with result of {best_p}")
 
-# # If we want to see the accuracies of each num_pcs
-for num, acc in cv_results.items():
-    print(f"Accuracy with {num} principal components: {acc}")
+# # # If we want to see the accuracies of each num_pcs
+# for num, acc in cv_results.items():
+#     print(f"Accuracy with {num} principal components: {acc}")
 
 # Now test the best_pc on test data
 best_p = 200                            # I have this right now since I tested that 200 was the best out of what I tried
@@ -42,11 +42,11 @@ X_train_pca = project_data(pca, X_train)
 X_test_pca = project_data(pca, X_test)
 print("Projected test data on PCs")
 
-model = train_knn(X_train_pca, y_train, k=3)
-test_acc = evaluate_model(model, X_test_pca, y_test)
+# model = train_knn(X_train_pca, y_train, k=3)
+# test_acc = evaluate_model(model, X_test_pca, y_test)
 
-print(f"Size of testing dataset: {X_test_pca.shape[0]} by {X_test_pca.shape[1]}")
-print(f"Test accuracy under {best_p} principal components: {test_acc}")
+# print(f"Size of testing dataset: {X_test_pca.shape[0]} by {X_test_pca.shape[1]}")
+# print(f"Test accuracy under {best_p} principal components: {test_acc}")
 
 # Plot components (uncomment if want plot)
 # plot_pca_first_two_components(X_train_pca, y_train, title="Train set: PC1 vs PC2")
@@ -60,6 +60,9 @@ transform = get_resnet_transform()
 
 X_train_resnet = extract_resnet_features(images_train, resnet, transform)
 X_test_resnet = extract_resnet_features(images_test, resnet, transform)
+
+# Plot t-SNE of CNN embeddings (train set)
+plot_resnet_tsne(X_train_resnet, y_train)
 
 # Use KNN with CNN embeddings to test accuracy
 resnet_knn = train_knn(X_train_resnet, y_train, k=3)

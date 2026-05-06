@@ -1,14 +1,3 @@
-"""Main experiment (noisy filtered dataset) using streaming IncrementalPCA
-
-Avoids loading all images into RAM at once
-- Lists image file paths + labels from `data/filtered_noisy/`
-- Splits paths into train/test
-- Fits `IncrementalPCA` on training batches (partial_fit)
-- Transforms train/test in batches
-- Trains KNN on PCA features
-- Tests on ResNet50 once again
-"""
-
 from pca import *
 from cnn import *
 
@@ -22,8 +11,7 @@ from tqdm.auto import tqdm
 
 from visualize import plot_pca_first_two_components, plot_pca_first_three_components
 
-
-# DIRECTORIES, PARAMETERS
+# Directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.join(BASE_DIR, "data", "filtered_noisy")
 
@@ -95,8 +83,8 @@ print(f"Train/test split: {len(paths_train)}/{len(paths_test)}")
 
 
 ### Run IncrementalPCA on training batches
-best_p = 200  # keep your current choice
-batch_size = max(256, best_p)
+best_p = 200 # Change here if not doing CV
+batch_size = 256
 
 ipca = IncrementalPCA(n_components=best_p, batch_size=batch_size)
 
@@ -126,12 +114,7 @@ for X_batch, idx_start, idx_end in tqdm(
 ):
 	X_train_pca[idx_start:idx_end] = ipca.transform(X_batch).astype(np.float32)
 
-for X_batch, idx_start, idx_end in tqdm(
-	iter_preprocessed_batches(paths_test, batch_size=batch_size),
-	total=n_test_batches,
-	desc="Transform test",
-	unit="batch",
-):
+for X_batch, idx_start, idx_end in tqdm(iter_preprocessed_batches(paths_test, batch_size=batch_size), total=n_test_batches):
 	X_test_pca[idx_start:idx_end] = ipca.transform(X_batch).astype(np.float32)
 
 print("Projected test data on PCs")
@@ -153,25 +136,15 @@ print("Extracting ResNet50 embeddings...")
 resnet = load_resnet50()
 transform = get_resnet_transform()
 
-resnet_batch_size = 32  # CPU-safe; increase if you have lots of RAM
+resnet_batch_size = 32 
 X_train_resnet = np.empty((len(paths_train), 2048), dtype=np.float32)
 X_test_resnet = np.empty((len(paths_test), 2048), dtype=np.float32)
 
-for images_batch, idx_start, idx_end in tqdm(
-    iter_image_batches(paths_train, batch_size=resnet_batch_size),
-    total=math.ceil(len(paths_train) / resnet_batch_size),
-    desc="ResNet train",
-    unit="batch",
-):
+for images_batch, idx_start, idx_end in tqdm(iter_image_batches(paths_train, batch_size=resnet_batch_size), total=math.ceil(len(paths_train) / resnet_batch_size)):
     feats = extract_resnet_features(images_batch, resnet, transform).astype(np.float32)
     X_train_resnet[idx_start:idx_end] = feats
 
-for images_batch, idx_start, idx_end in tqdm(
-    iter_image_batches(paths_test, batch_size=resnet_batch_size),
-    total=math.ceil(len(paths_test) / resnet_batch_size),
-    desc="ResNet test",
-    unit="batch",
-):
+for images_batch, idx_start, idx_end in tqdm(iter_image_batches(paths_test, batch_size=resnet_batch_size), total=math.ceil(len(paths_test) / resnet_batch_size),):
     feats = extract_resnet_features(images_batch, resnet, transform).astype(np.float32)
     X_test_resnet[idx_start:idx_end] = feats
 

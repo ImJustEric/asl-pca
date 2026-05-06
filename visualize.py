@@ -15,13 +15,7 @@ def plot_pca_first_two_components(X_pca, labels, title="PCA projection (PC1 vs P
 	alpha = 0.7
 
 	X_pca = np.asarray(X_pca)
-	if X_pca.ndim != 2 or X_pca.shape[1] < 2:
-		raise ValueError(f"X_pca must have shape (n_samples, n_components>=2); got {X_pca.shape}")
-
 	labels_arr = np.asarray(list(labels))
-	if labels_arr.shape[0] != X_pca.shape[0]:
-		raise ValueError(f"labels length ({labels_arr.shape[0]}) must match X_pca rows ({X_pca.shape[0]})")
-
 	unique_labels = np.unique(labels_arr.astype(str))
 	num_classes = unique_labels.shape[0]
 
@@ -68,13 +62,8 @@ def plot_pca_first_three_components(X_pca, labels, title="PCA projection (PC1 vs
 	alpha = 0.7
 
 	X_pca = np.asarray(X_pca)
-	if X_pca.ndim != 2 or X_pca.shape[1] < 3:
-		raise ValueError(f"X_pca must have shape (n_samples, n_components>=3); got {X_pca.shape}")
 
 	labels_arr = np.asarray(list(labels))
-	if labels_arr.shape[0] != X_pca.shape[0]:
-		raise ValueError(f"labels length ({labels_arr.shape[0]}) must match X_pca rows ({X_pca.shape[0]})")
-
 	unique_labels = np.unique(labels_arr.astype(str))
 	num_classes = unique_labels.shape[0]
 
@@ -118,18 +107,10 @@ def plot_pca_first_three_components(X_pca, labels, title="PCA projection (PC1 vs
 def plot_pca_component_images(pca, n_components=10, image_shape=(400, 400), save_path=None):
     """
     Visualize the first n PCA components as 'eigen-images'.
-
-    pca: fitted sklearn.decomposition.PCA
-    image_shape: (H, W) to reshape each component vector
     """
     comps = np.asarray(pca.components_)
-    if comps.ndim != 2:
-        raise ValueError(f"pca.components_ should be 2D; got {comps.shape}")
-
     n = min(n_components, comps.shape[0])
     H, W = image_shape
-    if comps.shape[1] != H * W:
-        raise ValueError(f"component length {comps.shape[1]} != H*W ({H*W}); set image_shape correctly")
 
     rows = int(np.ceil(n / 5))
     cols = min(5, n)
@@ -140,7 +121,6 @@ def plot_pca_component_images(pca, n_components=10, image_shape=(400, 400), save
     for i in range(n):
         comp_img = comps[i].reshape(H, W)
 
-        # symmetric scaling helps because components have + and - values
         vmax = np.max(np.abs(comp_img)) + 1e-12
         axes[i].imshow(comp_img, cmap="gray", vmin=-vmax, vmax=vmax)
         axes[i].set_title(f"PC{i+1}")
